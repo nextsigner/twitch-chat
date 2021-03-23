@@ -1,11 +1,18 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.12
+import QtMultimedia 5.12
 import QtWebView 1.1
 import Qt.labs.settings 1.1
 ApplicationWindow{
     id: app
     visible: true
     visibility: "Maximized"
+    MediaPlayer{
+        id: mp
+        source: './sounds/beep.wav'
+        autoLoad: true
+        autoPlay: true
+    }
     Item{
         id: xApp
         anchors.fill: parent
@@ -52,6 +59,9 @@ ApplicationWindow{
                             }
                         }else{
                             uMsgs.push(m0[0])
+                        }
+                        if(app.uMsg!==uMsgs[uMsgs.length-1]){
+                            mp.play()
                         }
                         app.uMsg=uMsgs[uMsgs.length-1]
                         console.log('Html2: '+uMsgs.toString())
