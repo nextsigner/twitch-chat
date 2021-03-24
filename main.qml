@@ -31,6 +31,16 @@ ApplicationWindow{
             }
         }
     }
+    Rectangle{
+        id: xLed
+        width: 100
+        height: width
+        border.width: 4
+        border.color: '#ff8833'
+        radius: 10
+        property bool toogle: false
+        color: toogle?'red':'green'
+    }
     property string uMsg: 'null'
     Timer{
         id: tCheck
@@ -43,6 +53,9 @@ ApplicationWindow{
                 //console.log('Doc: '+html)
                 if(html&&html!==apps.uHtml){
                     //unik.speak('yes')
+                    //if(app.uMsg!==uMsgs[uMsgs.length-1]){
+                        //mp.play()
+                    //}
                     wv.runJavaScript('function doc(){var d=document.body.innerText; return d;};doc();', function(html2){
                         //console.log('Html2: '+html2)
                         let m0=html2.split('\n')
@@ -59,11 +72,12 @@ ApplicationWindow{
                             }
                         }else{
                             uMsgs.push(m0[0])
-                        }
-                        if(app.uMsg!==uMsgs[uMsgs.length-1]){
+                        }                        
+                        if(uMsgs[uMsgs.length-1]!==''&&uMsgs[uMsgs.length-1]!==app.uMsg){
+                            app.uMsg=uMsgs[uMsgs.length-1]
+                            xLed.toogle=!xLed.toogle
                             mp.play()
                         }
-                        app.uMsg=uMsgs[uMsgs.length-1]
                         console.log('Html2: '+uMsgs.toString())
                         apps.uHtml=html
                         running=true
