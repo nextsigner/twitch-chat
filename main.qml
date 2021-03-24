@@ -28,9 +28,9 @@ ApplicationWindow{
         WebView{
             id: wv
             width: parent.width
-            height: parent.height
+            height: parent.height*0.5
             x:50
-            y: 50
+            y: 100
             url:"https://streamlabs.com/widgets/chat-box/v1/15602D8555920F741CDF"
             onLoadProgressChanged:{
                 if(loadProgress===100){
@@ -47,6 +47,15 @@ ApplicationWindow{
             radius: 10
             property bool toogle: false
             color: toogle?'red':'green'
+            Text {
+                id: info
+                text: 'nada'
+                font.pixelSize: 24
+                width: xApp.width-20
+                wrapMode: Text.WordWrap
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+            }
         }
     }
 
@@ -87,6 +96,8 @@ ApplicationWindow{
                             xLed.toogle=!xLed.toogle
                             xLed.z=xLed.z+wv.z+1000
                             mp.play()
+                            let mps=(''+mp.source).replace('file://', '')
+                            info.text=mps+' '+unik.fileExist(mps)
                         }
                         console.log('Html2: '+uMsgs.toString())
                         apps.uHtml=html
