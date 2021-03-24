@@ -76,6 +76,7 @@ ApplicationWindow{
                         if(uMsgs[uMsgs.length-1]!==''&&uMsgs[uMsgs.length-1]!==app.uMsg){
                             app.uMsg=uMsgs[uMsgs.length-1]
                             xLed.toogle=!xLed.toogle
+                            xLed.z=xLed.z+wv.z+1000
                             mp.play()
                         }
                         console.log('Html2: '+uMsgs.toString())
