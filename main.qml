@@ -7,9 +7,14 @@ ApplicationWindow{
     id: app
     visible: true
     visibility: "Maximized"
+    color: '#33ff88'
+    onClosing: {
+       close.accepted = true
+        Qt.quit()
+    }
     MediaPlayer{
         id: mp
-        source: './sounds/beep.wav'
+        source: pws+'/twitch-chat/sounds/beep.wav'
         autoLoad: true
         autoPlay: true
     }
@@ -22,7 +27,10 @@ ApplicationWindow{
         }
         WebView{
             id: wv
-            anchors.fill: parent
+            width: parent.width
+            height: parent.height
+            x:50
+            y: 50
             url:"https://streamlabs.com/widgets/chat-box/v1/15602D8555920F741CDF"
             onLoadProgressChanged:{
                 if(loadProgress===100){
@@ -30,17 +38,18 @@ ApplicationWindow{
                 }
             }
         }
+        Rectangle{
+            id: xLed
+            width: 100
+            height: width
+            border.width: 4
+            border.color: '#ff8833'
+            radius: 10
+            property bool toogle: false
+            color: toogle?'red':'green'
+        }
     }
-    Rectangle{
-        id: xLed
-        width: 100
-        height: width
-        border.width: 4
-        border.color: '#ff8833'
-        radius: 10
-        property bool toogle: false
-        color: toogle?'red':'green'
-    }
+
     property string uMsg: 'null'
     Timer{
         id: tCheck
