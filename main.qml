@@ -9,14 +9,28 @@ ApplicationWindow{
     visibility: "Maximized"
     color: '#33ff88'
     onClosing: {
-       close.accepted = true
+        close.accepted = true
         Qt.quit()
     }
-    MediaPlayer{
-        id: mp
-        source: pws+'/twitch-chat/sounds/beep.wav'
-        autoLoad: true
-        autoPlay: true
+    //    MediaPlayer{
+    //        id: mp
+    //        source: pws+'/twitch-chat/sounds/beep.wav'
+    //        autoLoad: true
+    //        autoPlay: true
+    //    }
+    Audio {
+        id: mp;
+        onPlaybackStateChanged:{
+            if(mp.playbackState===Audio.StoppedState){
+                playlist.removeItem(0)
+            }
+        }
+        playlist: Playlist {
+            id: playlist
+            //PlaylistItem { source: "song1.ogg"; }
+            //PlaylistItem { source: "song2.ogg"; }
+            //PlaylistItem { source: "song3.ogg"; }
+        }
     }
     Item{
         id: xApp
@@ -72,7 +86,7 @@ ApplicationWindow{
                 if(html&&html!==apps.uHtml){
                     //unik.speak('yes')
                     //if(app.uMsg!==uMsgs[uMsgs.length-1]){
-                        //mp.play()
+                    //mp.play()
                     //}
                     wv.runJavaScript('function doc(){var d=document.body.innerText; return d;};doc();', function(html2){
                         //console.log('Html2: '+html2)
@@ -90,11 +104,14 @@ ApplicationWindow{
                             }
                         }else{
                             uMsgs.push(m0[0])
-                        }                        
+                        }
                         if(uMsgs[uMsgs.length-1]!==''&&uMsgs[uMsgs.length-1]!==app.uMsg){
                             app.uMsg=uMsgs[uMsgs.length-1]
                             xLed.toogle=!xLed.toogle
                             xLed.z=xLed.z+wv.z+1000
+                            //mp.source='https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text=ricardo%20%20martin%20dice%20probando%20audio&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3'
+                            let msg=app.uMsg.replace(/ /g, '%20').replace(/\n/g, '')
+                            playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3')
                             mp.play()
                             let mps=(''+mp.source).replace('file://', '')
                             info.text=mps+' '+unik.fileExist(mps)
