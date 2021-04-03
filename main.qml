@@ -7,17 +7,13 @@ ApplicationWindow{
     id: app
     visible: true
     visibility: "Maximized"
-    color: '#33ff88'
+    color: 'transparent'
+    title: 'Twicht Chat Speech'
+    property int fs: width*0.02
     onClosing: {
         close.accepted = true
         Qt.quit()
     }
-    //    MediaPlayer{
-    //        id: mp
-    //        source: pws+'/twitch-chat/sounds/beep.wav'
-    //        autoLoad: true
-    //        autoPlay: true
-    //    }
     Audio {
         id: mp;
         onPlaybackStateChanged:{
@@ -27,9 +23,9 @@ ApplicationWindow{
         }
         playlist: Playlist {
             id: playlist
-            //PlaylistItem { source: "song1.ogg"; }
-            //PlaylistItem { source: "song2.ogg"; }
-            //PlaylistItem { source: "song3.ogg"; }
+            onItemCountChanged:{
+                xMsgList.actualizar(playlist)
+            }
         }
     }
     Item{
@@ -42,10 +38,11 @@ ApplicationWindow{
         WebView{
             id: wv
             width: parent.width
-            height: parent.height*0.5
-            x:50
-            y: 100
+            height: parent.height//*0.5
+            //            x:50
+            //            y: 100
             url:"https://streamlabs.com/widgets/chat-box/v1/15602D8555920F741CDF"
+            //visible:false
             onLoadProgressChanged:{
                 if(loadProgress===100){
                     tCheck.start()
@@ -61,6 +58,7 @@ ApplicationWindow{
             radius: 10
             property bool toogle: false
             color: toogle?'red':'green'
+            visible: false
             Text {
                 id: info
                 text: 'nada'
@@ -71,7 +69,20 @@ ApplicationWindow{
                 anchors.leftMargin: 20
             }
         }
+        Row{
+            id: mainRow
+            width: parent.width
+            height: parent.height
+            XMsgList{
+                id: xMsgList
+                width: mainRow.width*0.5
+            }
+            XUsersList{
+                id: xUserList
+            }
+        }
     }
+    
 
     property string uMsg: 'null'
     Timer{
@@ -105,18 +116,28 @@ ApplicationWindow{
                         }else{
                             uMsgs.push(m0[0])
                         }
-                        if(uMsgs[uMsgs.length-1]!==''&&uMsgs[uMsgs.length-1]!==app.uMsg){
+                        let nMsg=uMsgs[uMsgs.length-1]
+                        if(isVM(nMsg)&&uMsgs[uMsgs.length-1]!==''&&uMsgs[uMsgs.length-1]!==app.uMsg){
                             app.uMsg=uMsgs[uMsgs.length-1]
                             xLed.toogle=!xLed.toogle
                             xLed.z=xLed.z+wv.z+1000
                             //mp.source='https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text=ricardo%20%20martin%20dice%20probando%20audio&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3'
-                            let msg=app.uMsg.replace(/ /g, '%20').replace(/\n/g, '')
+                            let mm0=app.uMsg.trim().split('\t')
+                            console.log('mm0['+mm0[0]+']')
+                            xUserList.addUser(mm0[0])
+                            if(!xUserList.userIsEnabled(mm0[0])){
+                                console.log('User disabled: '+mm0[0])
+                                return
+                            }
+                            let msg=app.uMsg.replace(mm0[0], mm0[0]+' dice ')
+                            msg=msg.replace(/ /g, '%20').replace(/_/g, ' ')
+                            //console.log('MSG: '+msg)
                             playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3')
                             mp.play()
                             let mps=(''+mp.source).replace('file://', '')
                             info.text=mps+' '+unik.fileExist(mps)
                         }
-                        console.log('Html2: '+uMsgs.toString())
+                        //console.log('Html2: '+uMsgs.toString())
                         apps.uHtml=html
                         running=true
                         return
@@ -131,5 +152,15 @@ ApplicationWindow{
                 running=true
             });
         }
+    }
+    function isVM(msg){
+        if(msg.indexOf('http:/')>=0||msg.indexOf('https:/')>=0){
+            return false
+        }
+        //Nightbot
+        if(msg.indexOf('Nightbot')>=0){
+            return false
+        }
+        return true
     }
 }
