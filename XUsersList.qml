@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.7
+import QtQuick.Controls 2.12
 import Qt.labs.settings 1.1
 
 Rectangle {
@@ -7,10 +8,30 @@ Rectangle {
     height: parent.height
     border.width: 2
     border.color: 'red'
+    color: 'transparent'
     property alias listModel: lm
+    state: 'show'
+    states: [
+        State {
+            name: "show"
+            PropertyChanges {
+                target: r
+                width: r.parent.width*0.25
+            }
+        },
+        State {
+            name: "hide"
+            PropertyChanges {
+                target: r
+                width: 1
+            }
+        }
+    ]
+    Behavior on width{NumberAnimation{duration: 250}}
     ListView{
         id: lv
-        anchors.fill: r
+        width: r.parent.width*0.25
+        height: r.parent.height
         model: lm
         delegate: del
     }
@@ -27,11 +48,12 @@ Rectangle {
         id: del
         Rectangle{
             id: xUser
-            width: r.width-app.fs
-            height: txtUser.contentHeight+app.fs
+            width: u!=='ricardo__martin'?lv.width-app.fs:lv.width
+            height: u!=='ricardo__martin'?txtUser.contentHeight+app.fs:bot1.height
             border.width: xUserSettings.enabled?4:1
-            border.color: 'blue'
+            border.color: xUserSettings.enabled?'red':'blue'
             color: 'black'
+            anchors.horizontalCenter: parent.horizontalCenter
             Settings{
                 id: xUserSettings
                 fileName: '../'+u+'.cfg'
@@ -46,10 +68,25 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 anchors.centerIn: parent
                 color: 'white'
+                visible: u!=='ricardo__martin'
             }
             MouseArea{
                 anchors.fill: parent
                 onClicked: xUserSettings.enabled=!xUserSettings.enabled
+                visible: u!=='ricardo__martin'
+            }
+            Button{
+                id: bot1
+                text: '<'
+                width: app.fs
+                anchors.left: parent.left
+                anchors.leftMargin: r.state==='hide'?0-bot1.width:0
+                onClicked: {
+                    r.state=r.state==='show'?'hide':'show'
+                    //app.editable=false
+                    //app.showMode(app.editable)
+                }
+                visible: u==='ricardo__martin'
             }
             Component.onCompleted: {
                 e=xUserSettings.enabled
@@ -58,6 +95,9 @@ Rectangle {
 //                return xUserSettings.enabled
 //            }
         }
+    }
+    Component.onCompleted: {
+        addUser('ricardo__martin')
     }
     function addUser(user){
         let e=false

@@ -3,9 +3,14 @@ import QtQuick 2.0
 Rectangle {
     id: r
     width: parent.width
-    height: parent.height*0.5
+    height: parent.height
     border.width: 2
     border.color: 'red'
+    color: 'transparent'
+//    MouseArea{
+//        anchors.fill: parent
+//        onClicked: Qt.quit()//app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+//    }
     ListView{
         id: lv
         anchors.fill: r
@@ -29,6 +34,7 @@ Rectangle {
             border.width: 3
             border.color: 'blue'
             color: 'black'
+            anchors.horizontalCenter: parent.horizontalCenter
             Text {
                 id: txtMsg
                 text: 'Msg: '+u
@@ -37,6 +43,10 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 anchors.centerIn: parent
                 color: 'white'
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: unik.speak('Click')
             }
             Component.onCompleted: {
                 //mp.source='https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text=ricardo%20%20martin%20dice%20probando%20audio&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3'
@@ -53,6 +63,33 @@ Rectangle {
         lm.clear()
         for(var i=0;i<pl.itemCount;i++){
             lm.append(lm.addItem(pl.itemSource(i).toString()))
+        }
+    }
+    Timer{
+        id: tM
+        running: true
+        repeat: false
+        interval: 3000
+        onTriggered: {
+            let code=''
+            code+='import QtQuick 2.0\n'
+            code+='Rectangle{\n'
+            //code+=' z: lv.z-1\n'
+            code+=' color: "transparent"\n'
+            code+=' anchors.fill: parent\n'
+            code+=' MouseArea{\n'
+            code+='     anchors.fill: parent\n'
+            code+='    onClicked: { \n'
+            code+='         console.log("Ejecutando...")\n'
+            //code+='         parent.color="red"\n'
+            code+='         app.showMode(false)\n'
+            code+='     }\n'
+            code+=' }\n'
+            code+=' Component.onCompleted: {\n'
+            //code+='     mainRow.z=z+1\n'
+            code+=' }\n'
+            code+='}\n'
+            let comp=Qt.createQmlObject(code, r, 'code')
         }
     }
 }

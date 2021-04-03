@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.12
+import QtQuick.Window 2.0
 import QtMultimedia 5.12
 import QtWebView 1.1
 import Qt.labs.settings 1.1
@@ -10,10 +11,24 @@ ApplicationWindow{
     color: 'transparent'
     title: 'Twicht Chat Speech'
     property int fs: width*0.02
+    property bool editable: false
     onClosing: {
         close.accepted = true
         Qt.quit()
     }
+    onVisibilityChanged: {
+        if(app.visibility===ApplicationWindow.Maximized){
+            app.editable=!app.editable
+            showMode(app.editable)
+        }
+    }
+    onActiveChanged: {
+        //        if(active){
+        //            app.editable=true
+        //            showMode(app.editable)
+        //        }
+    }
+
     Audio {
         id: mp;
         onPlaybackStateChanged:{
@@ -28,27 +43,44 @@ ApplicationWindow{
             }
         }
     }
+    //    Item{
+    //        id: xMouseArea
+    //        visible: false
+    //        width: Screen.width
+    //        height: Screen.desktopAvailableHeight
+    //        MouseArea{
+    //            anchors.fill: parent
+    //            onClicked: app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+    //        }
+    //    }
+    Settings{
+        id: apps
+        property string uHtml: ''
+    }
     Item{
-        id: xApp
+        id: xAppWV
         anchors.fill: parent
-        Settings{
-            id: apps
-            property string uHtml: ''
-        }
+        opacity: app.editable?1.0:0.65
         WebView{
             id: wv
             width: parent.width
             height: parent.height//*0.5
-            //            x:50
+            x:app.width+1280
             //            y: 100
             url:"https://streamlabs.com/widgets/chat-box/v1/15602D8555920F741CDF"
-            //visible:false
+            visible:false
             onLoadProgressChanged:{
                 if(loadProgress===100){
                     tCheck.start()
                 }
             }
         }
+    }
+    Item{
+        id: xApp
+        anchors.fill: parent
+        opacity: app.editable?1.0:0.65
+
         Rectangle{
             id: xLed
             width: 100
@@ -68,21 +100,37 @@ ApplicationWindow{
                 anchors.left: parent.left
                 anchors.leftMargin: 20
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    Qt.quit()
+                    app.editable=false
+                    console.log('Desactivando...')
+                    showMode(app.editable)
+                }
+                Rectangle{
+                    anchors.fill: parent
+                    color: '#ff8833'
+                }
+            }
         }
+
         Row{
             id: mainRow
             width: parent.width
             height: parent.height
             XMsgList{
                 id: xMsgList
-                width: mainRow.width*0.5
+                width: mainRow.width-xUserList.width
+                border.width: app.editable?2:0
             }
             XUsersList{
                 id: xUserList
+                width: mainRow.width*0.25
+                border.width: app.editable?2:0
             }
         }
     }
-    
 
     property string uMsg: 'null'
     Timer{
@@ -153,6 +201,33 @@ ApplicationWindow{
             });
         }
     }
+    Timer{
+        id: tM
+        running: false
+        repeat: false
+        interval: 3000
+        onTriggered: {
+            let code=''
+            code+='import QtQuick 2.0\n'
+            code+='Rectangle{\n'
+            //code+=' z: xMsgList.z-1\n'
+            code+=' color: "blue"\n'
+            code+=' anchors.fill: parent\n'
+            code+=' MouseArea{\n'
+            code+='     anchors.fill: parent\n'
+            code+='    onClicked: { \n'
+            code+='         console.log("Ejecutando...")\n'
+            code+='         parent.color="red"\n'
+            code+='         app.showMode(false)\n'
+            code+='     }\n'
+            code+=' }\n'
+            code+=' Component.onCompleted: {\n'
+            //code+='     mainRow.z=z+1\n'
+            code+=' }\n'
+            code+='}\n'
+            let comp=Qt.createQmlObject(code, xApp, 'code')
+        }
+    }
     function isVM(msg){
         if(msg.indexOf('http:/')>=0||msg.indexOf('https:/')>=0){
             return false
@@ -162,5 +237,18 @@ ApplicationWindow{
             return false
         }
         return true
+    }
+    function showMode(b){
+        if(b){
+            app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint// | Qt.WindowTransparentForInput
+            //app.flags=Qt.Window | Qt.WindowStaysOnTopHint// | Qt.WindowTransparentForInput
+            //app.flags=Qt.Window | Qt.WindowStaysOnTopHint
+            //app.raise()
+            //app.modality=Qt.ApplicationModal
+            //app.active=true
+        }else{
+            app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+            //app.flags=Qt.Window | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+        }
     }
 }
