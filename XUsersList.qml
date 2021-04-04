@@ -77,7 +77,7 @@ Rectangle {
             }
             Button{
                 id: bot1
-                text: '<'
+                text: r.state==='show'?'>':'<'
                 width: app.fs
                 anchors.left: parent.left
                 anchors.leftMargin: r.state==='hide'?0-bot1.width:0
@@ -87,6 +87,20 @@ Rectangle {
                     //app.showMode(app.editable)
                 }
                 visible: u==='ricardo__martin'
+            }
+            Button{
+                id: botBan
+                text: 'X'
+                font.pixelSize: app.fs*0.5
+                width: app.fs*0.75
+                height: width
+                anchors.right: parent.right
+                onClicked: {
+                    let stringBan='/ban '+u
+                    clipboard.setText(stringBan)
+                    unik.run('sh ./ban.sh')
+                }
+                //visible: u==='ricardo__martin'
             }
             Component.onCompleted: {
                 e=xUserSettings.enabled
