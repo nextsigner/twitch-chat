@@ -79,8 +79,7 @@ ApplicationWindow{
     Item{
         id: xApp
         anchors.fill: parent
-        opacity: app.editable?1.0:0.65
-
+        //opacity: app.editable?1.0:0.65
         Rectangle{
             id: xLed
             width: 100
