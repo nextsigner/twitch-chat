@@ -4,6 +4,7 @@ import QtQuick.Window 2.0
 import QtMultimedia 5.12
 import QtWebView 1.1
 import Qt.labs.settings 1.1
+
 ApplicationWindow{
     id: app
     visible: true
@@ -43,16 +44,6 @@ ApplicationWindow{
             }
         }
     }
-    //    Item{
-    //        id: xMouseArea
-    //        visible: false
-    //        width: Screen.width
-    //        height: Screen.desktopAvailableHeight
-    //        MouseArea{
-    //            anchors.fill: parent
-    //            onClicked: app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
-    //        }
-    //    }
     Settings{
         id: apps
         property string uHtml: ''
@@ -130,7 +121,27 @@ ApplicationWindow{
             }
         }
     }
-
+    Item{
+        id: xAlarmVisual
+        visible: false
+        width: Screen.width
+        height: Screen.desktopAvailableHeight
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                //app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
+                for(var i=0;i<xAlarmVisual.children.length;i++){
+                    xAlarmVisual.children[i].destroy()
+                }
+                xAlarmVisual.visible=false
+            }
+        }
+        function addAlarmVisual(t){
+            let comp = Qt.createComponent("XAlarmVisual.qml")
+            let obj=comp.createObject(xAlarmVisual, {text: t})
+            xAlarmVisual.visible=true
+        }
+    }
     property string uMsg: 'null'
     Timer{
         id: tCheck
@@ -177,10 +188,20 @@ ApplicationWindow{
                                 return
                             }
                             let msg=app.uMsg.replace(mm0[0], mm0[0]+' dice ')
+                            let msg2=msg
                             msg=msg.replace(/ /g, '%20').replace(/_/g, ' ')
                             //console.log('MSG: '+msg)
                             playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3')
                             mp.play()
+                            if(xUserList.alarmaVisual){
+                                //console.log('Ejecutando alarma visual...')
+                                xAlarmVisual.addAlarmVisual(msg2)
+                                app.editable=true
+                                showMode(app.editable)
+                                //Qt.quit()
+                            }else{
+                                console.log('NO Ejecutando alarma visual...')
+                            }
                             let mps=(''+mp.source).replace('file://', '')
                             info.text=mps+' '+unik.fileExist(mps)
                         }
@@ -225,6 +246,15 @@ ApplicationWindow{
             code+=' }\n'
             code+='}\n'
             let comp=Qt.createQmlObject(code, xApp, 'code')
+        }
+    }
+    Shortcut{
+        sequence: 'Esc'
+        onActivated: {
+            for(var i=0;i<xAlarmVisual.children.length;i++){
+                xAlarmVisual.children[i].destroy()
+            }
+            xAlarmVisual.visible=false
         }
     }
     function isVM(msg){

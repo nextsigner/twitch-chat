@@ -10,6 +10,7 @@ Rectangle {
     border.color: 'red'
     color: 'transparent'
     property alias listModel: lm
+    property bool alarmaVisual: false
     state: 'show'
     states: [
         State {
@@ -99,6 +100,19 @@ Rectangle {
                     let stringBan='/ban '+u
                     clipboard.setText(stringBan)
                     unik.run('sh ./ban.sh')
+                }
+                //visible: u==='ricardo__martin'
+            }
+            Button{
+                id: botAlarma
+                text: r.alarmaVisual?'[A]':'-A-'
+                font.pixelSize: app.fs*0.5
+                width: app.fs*2
+                height: app.fs
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: index===0
+                onClicked: {
+                    r.alarmaVisual=!r.alarmaVisual
                 }
                 //visible: u==='ricardo__martin'
             }
