@@ -13,6 +13,30 @@ ApplicationWindow{
     title: 'Twicht Chat Speech'
     property int fs: width*0.02
     property bool editable: false
+    property bool toWriteInTawk: false
+    property var aVoices: [
+        'es-ES_EnriqueVoice',
+        'es-ES_EnriqueV3Voice',
+        'es-ES_LauraVoice',
+        'es-ES_LauraV3Voice',
+        'es-LA_SofiaVoice',
+        'es-LA_SofiaV3Voice',
+        'es-US_SofiaVoice',
+        'es-US_SofiaV3Voice',
+        'en-GB_CharlotteV3Voice',
+        'en-GB_KateVoice',
+        'en-GB_KateV3Voice',
+        'en-GB_JamesV3Voice',
+        'en-US_AllisonVoice',
+        'en-US_AllisonV3Voice',
+        'en-US_EmilyV3Voice',
+        'en-US_OliviaV3Voice',
+        'en-US_LisaVoice',
+        'en-US_LisaV3Voice',
+        'en-US_HenryV3Voice',
+        'en-US_KevinV3Voice',
+        'en-US_MichaelVoice',
+        'en-US_MichaelV3Voice']
     onClosing: {
         close.accepted = true
         Qt.quit()
@@ -189,9 +213,13 @@ ApplicationWindow{
                             }
                             let msg=app.uMsg.replace(mm0[0], mm0[0]+' dice ')
                             let msg2=msg
+                            if(app.toWriteInTawk)writeInTawk(uMsgs[uMsgs.length-1])
                             msg=msg.replace(/ /g, '%20').replace(/_/g, ' ')
                             //console.log('MSG: '+msg)
-                            playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3')
+                            //playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice=es-ES_EnriqueVoice&download=true&accept=audio%2Fmp3')
+                            let indexVoice=xUserList.getIndexVoice(mm0[0])
+                            if(indexVoice<0)indexVoice=0
+                            playlist.addItem('https://text-to-speech-demo.ng.bluemix.net/api/v3/synthesize?text='+msg+'&voice='+app.aVoices[indexVoice]+'&download=true&accept=audio%2Fmp3')
                             mp.play()
                             if(xUserList.alarmaVisual){
                                 //console.log('Ejecutando alarma visual...')
@@ -257,6 +285,10 @@ ApplicationWindow{
             xAlarmVisual.visible=false
         }
     }
+    Component.onCompleted: {
+        let sargs=Qt.application.arguments.toString()
+        if(sargs.indexOf('writetawk')>=0)app.toWriteInTawk=true
+    }
     function isVM(msg){
         if(msg.indexOf('http:/')>=0||msg.indexOf('https:/')>=0){
             return false
@@ -279,5 +311,8 @@ ApplicationWindow{
             app.flags=Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
             //app.flags=Qt.Window | Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput
         }
+    }
+    function writeInTawk(text){
+        unik.ejecutarLineaDeComandoAparte('sh /home/ns/nsp/uda/tawk-chat/writemsg.sh "'+text+'"')
     }
 }
